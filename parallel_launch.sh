@@ -87,7 +87,7 @@ while [[ $executedJobs -lt $totalJobs ]]; do
 		fi
 	done
 
-	sleep 1
+	sleep .01
 
 done
 
