@@ -2,6 +2,8 @@
 
 # PIDs are not re-used until PID_MAX_DEFAULT is reached.
 
+
+
 # Reads a text file with commands to execute
 if [ $# -lt 1 ]; then
 	echo " ==== ERROR ... ====."
@@ -22,6 +24,7 @@ pidArray=()
 jobsArray=()
 totalJobs=0
 executedJobs=0
+finishedJobs=0
 
 if [ $# -eq 2 ]; then
 	cores=$2
@@ -48,7 +51,7 @@ done < "$input"
 
 
 # control them and only launch as many as specified
-while [[ $executedJobs -lt $totalJobs ]]; do
+while [[ $executedJobs -lt $totalJobs || $finishedJobs -lt $totalJobs  ]]; do
 
 	# Execute job
 
@@ -60,7 +63,7 @@ while [[ $executedJobs -lt $totalJobs ]]; do
 		do
 			
 
-		        if [[ ${pidArray[$i]} -eq -1 ]]; then
+		        if [[ ${pidArray[$i]} -eq -1 && $executedJobs -lt $totalJobs ]]; then
 				pidArray[$i]=$pid
 				current_jobs=`expr $current_jobs + 1`
 				echo "PID: $pid JOBS: $current_jobs LAUNCHING: ${jobsArray[$executedJobs]}"
@@ -80,7 +83,8 @@ while [[ $executedJobs -lt $totalJobs ]]; do
 			ps -p $pid > /dev/null
 			if [[ $? == 1 ]]; then
 				current_jobs=`expr $current_jobs - 1`
-				echo "PID: $pid its gone!"
+				finishedJobs=`expr $finishedJobs + 1`
+				echo "PID: $pid finished! Completed: $finishedJobs from total: $totalJobs"
 				pidArray[$i]=-1
 			fi
 
